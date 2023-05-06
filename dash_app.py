@@ -13,21 +13,34 @@ fig = px.line(df, x='date', y='sales')
 
 app = dash.Dash(__name__)
 
+options = {
+    'north': ['north'],
+    'south': ['south'],
+    'east': ['east'],
+    'west': ['west'],
+    'all': ['north', 'south', 'east', 'west']
+}
+
 app.layout = html.Div([
-    html.H1('Pink Morsel Sales Analysis'),
+    html.H1(children='Pink Morsel Sales Analysis', style={'textAlign': 'center', 'color': 'hotpink'}),
     dcc.Graph(id='pink',
               figure=fig),
-    dcc.Dropdown(id='region-picker',
-                 options=[{'label': region, 'value': region} for region in df['region'].unique()],
-                 value=['north', 'south', 'east', 'west'],
-                 multi=True)
+    dcc.RadioItems(id='region-picker',
+                   options=[{'label': region, 'value': region} for region in options.keys()],
+                   value='all',
+                   inline=True,
+                   style={'textAlign': 'center', 'font-size': 20, 'font-weight': 'bold'},
+                   ),
 ])
 @app.callback(
     Output('pink', 'figure'),
     [Input('region-picker', 'value')])
 
 def update_figure(selected_region):
-    filtered_df = df[df['region'].isin(selected_region)]
+    if selected_region == 'all':
+        filtered_df = df
+    else:
+        filtered_df = df[df['region'].isin([selected_region])]
     fig = px.line(filtered_df, x='date', y='sales', color='region')
     return fig
 
